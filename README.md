@@ -4,9 +4,9 @@
 Github repo link: https://github.com/Mayor-Rhymes/drag-and-drop-gallery
 ##### THIS TASK HAS BEEN COMPLETED IN FULFILLMENT OF THE HNG STAGE THREE TASK REQUIREMENTS
 
-[x] Drag and Drop
-[x] Upload capability
-[x] Responsiveness
+- [x] Drag and Drop
+- [x] Upload capability
+- [x] Responsiveness
 
 
 
