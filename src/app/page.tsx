@@ -1,113 +1,199 @@
-import Image from 'next/image'
+"use client";
+import Navbar from "@/components/navbar";
+import Image, { StaticImageData } from "next/image";
+import girl1 from "../../public/girl.jpg";
+import girl2 from "../../public/girl 2.jpg";
+import boy1 from "../../public/boy1.jpg";
+import girl3 from "../../public/girl3.jpg";
+import stairway2 from "../../public/stairway.jpg";
+import personSillo from "../../public/person-silhouette.jpg";
+import { Suspense, useState } from "react";
+
+import {
+  GridContextProvider,
+  GridDropZone,
+  GridItem,
+  swap,
+} from "react-grid-dnd";
+import { useUser } from "@clerk/nextjs";
+import { useMediaQuery } from "react-responsive";
+import Loading from "./loading";
+
+interface ImageObject {
+  id: number;
+  imageSrc: StaticImageData;
+  tag?: string;
+}
 
 export default function Home() {
+  const initialImages: ImageObject[] = [
+    {
+      id: 1,
+      imageSrc: girl1,
+      tag: "girl with blonde hair",
+    },
+    {
+      id: 2,
+      imageSrc: boy1,
+      tag: "boy with black hair",
+    },
+    {
+      id: 3,
+      imageSrc: stairway2,
+      tag: "stairway",
+    },
+    {
+      id: 4,
+      imageSrc: girl2,
+      tag: "girl with nice hair",
+    },
+    {
+      id: 5,
+      imageSrc: girl3,
+      tag: "girl with traditional attire",
+    },
+    {
+      id: 6,
+      imageSrc: personSillo,
+      tag: "Person's Silhouette",
+    },
+  ];
+
+  const [search, setSearch] = useState("");
+
+  const handleSearch = () => {
+    let searchValue = search;
+    if (searchValue) {
+      const newImages = images.filter((image) =>
+        image.tag?.includes(searchValue)
+      );
+
+      setImages(newImages);
+      setSearch("");
+    } else {
+      setImages(initialImages);
+    }
+  };
+
+  const isDesktopOrLaptop = useMediaQuery({
+    query: "(min-width: 1224px)",
+  });
+  const isBigScreen = useMediaQuery({ query: "(min-width: 1824px)" });
+  const isTabletOrMobile = useMediaQuery({ query: "(max-width: 1224px)" });
+  const isPortrait = useMediaQuery({ query: "(orientation: portrait)" });
+  const isRetina = useMediaQuery({ query: "(min-resolution: 2dppx)" });
+  const { isLoaded, isSignedIn } = useUser();
+
+  const [images, setImages] = useState<ImageObject[]>(initialImages);
+
+  function onChange(
+    sourceId: string,
+    sourceIndex: number,
+    targetIndex: number
+  ) {
+    const result = swap(images, sourceIndex, targetIndex);
+    return setImages(result);
+  }
+
+  if (!isLoaded || !isSignedIn) {
+    return (
+      <main>
+        <Navbar />
+        <h4 className="text-center text-2xl mt-[90px] mb-10">
+          This is the home. Your place for Gallery
+        </h4>
+      </main>
+    );
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
+    <main>
+      <Suspense fallback={<Loading />}>
+        <Navbar />
+
+        <div className="flex flex-col mb-10 gap-10">
+          <h4 className="text-center text-2xl mt-[90px]">
+            This is the home. Your place for Drag and Drop Gallery
+          </h4>
+          <div className="flex flex-col lg:flex-row justify-around px-10 gap-4">
+            <input
+              value={search}
+              onChange={(event) => setSearch(event?.target.value)}
+              type="text"
+              placeholder="Search using tags present underneath the images"
+              className="grow-[2] h-10 p-6 border border-black rounded-md"
             />
-          </a>
+
+            <button
+              onClick={handleSearch}
+              className="grow bg-black text-white rounded-md"
+            >
+              {search ? "Search" : "Restore all pictures"}
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
+        {images.length === 0 && (
+          <p className="text-xl text-center font-extrabold">
+            {" "}
+            There are no images with that kind of tag. Click Restore all
+            pictures to see all images
           </p>
-        </a>
+        )}
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+        <GridContextProvider onChange={onChange}>
+          {isDesktopOrLaptop && (
+            <GridDropZone
+              id="items"
+              boxesPerRow={3}
+              rowHeight={400}
+              style={{ height: 400 * Math.ceil(images.length / 4) }}
+            >
+              {images.map((item) => (
+                <GridItem key={item.id} className="cursor-move px-2 py-2">
+                  <div className="h-full w-full flex flex-col items-center">
+                    <Image
+                      loading="lazy"
+                      placeholder="blur"
+                      src={item.imageSrc}
+                      className="pointer-events-none h-[300px]"
+                      alt="draggable images"
+                    />
+                    <p className="text-center text-lg font-bold">{item.tag}</p>
+                  </div>
+                </GridItem>
+              ))}
+            </GridDropZone>
+          )}
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+          {isTabletOrMobile && (
+            <GridDropZone
+              id="items"
+              boxesPerRow={2}
+              rowHeight={200}
+              style={{
+                height: 200 * Math.ceil(images.length / 2),
+                overflow: "auto",
+              }}
+            >
+              {images.map((item) => (
+                <GridItem key={item.id} className="cursor-move px-2">
+                  <div className="h-full w-full flex flex-col items-center">
+                    <Image
+                      loading="lazy"
+                      placeholder="blur"
+                      src={item.imageSrc}
+                      className="pointer-events-none touch-none h-[150px]"
+                      alt="draggable images"
+                    />
+                    <p className="text-center text-lg font-bold">{item.tag}</p>
+                  </div>
+                </GridItem>
+              ))}
+            </GridDropZone>
+          )}
+        </GridContextProvider>
+      </Suspense>
     </main>
-  )
+  );
 }
