@@ -65,7 +65,7 @@ export default function Home() {
     let searchValue = search;
     if (searchValue) {
       const newImages = images.filter((image) =>
-        image.tag?.includes(searchValue)
+        image.tag?.includes(searchValue.toLowerCase())
       );
 
       setImages(newImages);
